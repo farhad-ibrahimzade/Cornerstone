@@ -21,7 +21,7 @@ while True:
 ser.close()
 print(lanes)
 
-layout = [[gui.Text("Welcome to the Road Lane Game, please scan your road lanes.")], [gui.Text(str(lanes))]] #, [gui.Button("OK")]
+layout = [[gui.Text("Welcome to the Road Lane Game, here are your scanned lanes: ")], [gui.Text(lane) for lane in lanes]] #, [gui.Button("OK")]
 
 # Create the window
 window = gui.Window("Road Lane Game", layout)
