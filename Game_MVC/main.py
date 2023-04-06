@@ -6,7 +6,7 @@ from view.gui_game_view import GUIGameView
 from controller.game_controller import GameController
 
 
-ser = Serial('COM6', 9800, timeout=1)
+ser = None #Serial('COM5', 9800, timeout=1)
 time.sleep(2)
 
 model = Game()

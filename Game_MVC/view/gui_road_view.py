@@ -1,4 +1,5 @@
 import PySimpleGUI as gui
+import tkinter as tk
 
 from view.keys import Keys
 from view.road_view import RoadView
@@ -11,13 +12,10 @@ class GUIRoadView(RoadView):
         self.road = []
         super().__init__(road)
 
-    def display(self):
-        i = 1
-        for lane in self.road:
-            if i == 7:
-                break
-            self.window[Keys.keys[i]].update(lane)
-            i += 1
+    def display(self, road):
+        self.road = road
+        return [tk.Label(text=self.road[i]) for i in range(6)]
 
-        self.window.refresh()
+
+        
 

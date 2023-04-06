@@ -4,7 +4,7 @@ from serialtest import MySerial
 from tkinter import *
 
 # make sure the 'COM#' is set according the Windows Device Manager
-ser = serial.Serial('COM6', 9800, timeout=1)
+ser = serial.Serial('COM5', 9800, timeout=1)
 #time.sleep(2)
 
 serry = MySerial(ser)

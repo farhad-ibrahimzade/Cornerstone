@@ -4,6 +4,7 @@ import PySimpleGUI as gui
 from model.game import Game
 from view.game_view import GameView
 
+
 class GameController:
     def __init__(self, model: Game, view: GameView, ser: Serial) -> None:
         self.model = model
@@ -11,7 +12,7 @@ class GameController:
         self.ser = ser
 
     def run_game(self):
-        game_ended = self.view.refresh()  == gui.WIN_CLOSED
+        game_ended = False
         
         while not game_ended:
             while True:
@@ -20,25 +21,25 @@ class GameController:
                     # Break when all lanes scanned
                     break
                 self.model.make_move(lane)
-                self.view.display_road()
                 game_ended = self.model.check_finished()
-                game_ended = self.view.refresh()  == gui.WIN_CLOSED
+                game_ended = self.view.refresh()
 
             
-            game_ended = self.model.check_finished()
-            game_ended = self.view.refresh()  == gui.WIN_CLOSED
+            #game_ended = self.model.check_finished()
+            self.view.refresh()
 
         self.view.end()
 
     def get_lane(self):
-        line = self.ser.readline()
-        if line:
-            string = line.decode()  # convert the byte string to a unicode string
-            if string == "Done":
-                return ""
-            data = string.split(",")
-            return data[0]
+        return "Test"
+        # line = self.ser.readline()
+        # if line:
+        #     string = line.decode()  # convert the byte string to a unicode string
+        #     if string == "Done":
+        #         return ""
+        #     data = string.split(",")
+        #     return data[0]
         
-        else:
-            self.get_lane()
+        # else:
+        #     self.get_lane()
         

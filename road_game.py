@@ -3,7 +3,7 @@ import serial
 import PySimpleGUI as gui
 
 # make sure the 'COM#' is set according the Windows Device Manager
-ser = serial.Serial('COM6', 9800, timeout=1)
+ser = serial.Serial('COM5', 9800, timeout=1)
 time.sleep(2)
 
 lanes = []

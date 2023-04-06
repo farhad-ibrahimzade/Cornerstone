@@ -2,6 +2,7 @@ import time
 import serial
 import PySimpleGUI as gui
 import tkinter as tk
+from PIL import ImageTk, Image
 
 # make sure the 'COM#' is set according the Windows Device Manager
 ser = serial.Serial('COM6', 9800, timeout=1)
@@ -12,6 +13,13 @@ root = tk.Tk("Road Game Test")
 mainContainer = tk.Frame(root)
 
 lanes = []
+
+image1 = Image.open("Images\city.png")
+test = ImageTk.PhotoImage(image1.resize((300,300)))
+
+label1 = tk.Label(image=test)
+
+label1.place(x=10, y=10)
 
 label = tk.Label(mainContainer, text = "Lane")
 label.pack()
@@ -36,20 +44,6 @@ root.mainloop()
 
 ser.close()
 print(lanes)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #layout = [[gui.Text("Welcome to the Road Lane Game, please scan your road lanes.")], [gui.Text(str(lanes))]] #, [gui.Button("OK")]
