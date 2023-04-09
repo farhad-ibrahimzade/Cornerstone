@@ -9,21 +9,32 @@ LiquidCrystal lcd(A5, A4, A3, A2, A1, A0); // Initializing the LCD object
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
-const int contrastPin = 6;
+const int blueLED = 5;
+
+const int redLED = 6;
+
+const int greenLED = 7;
 
 const int contrast = 110;
 
-const int gameDelay = 1000;
+const int gameDelay = 500;
 
-String green[2] = {"04 4C 51 C2 5C 64 81", "04 F1 18 42 5D 64 80"};
-String pedestrian[2] = {"04 2B 60 A2 5C 64 81", "04 20 53 C2 5C 64 80"};
-String tram[2] = {"04 39 3C 42 5D 64 81", "04 52 40 42 5D 64 80"};
-String bus[2] = {"04 FA 41 42 5D 64 80", "04 28 60 A2 5C 64 81"};
-String bike[2] = {"04 4B EA 4A 5D 64 81", "04 57 40 42 5D 64 80"};
-String car[2] = {"04 F2 EA BA 5C 64 80", "04 A5 EB BA 5C 64 80"};
+String pedestrian[4] = {"04 2B 60 A2 5C 64 81", "04 20 53 C2 5C 64 80", "04 4C 51 C2 5C 64 81", "04 F1 18 42 5D 64 80"};
+String tram[4] = {"04 39 3C 42 5D 64 81", "04 52 40 42 5D 64 80", "04 EF 14 42 5D 64 80", "04 0C EF 7A 5D 64 81"};
+String bus[4] = {"04 FA 41 42 5D 64 80", "04 28 60 A2 5C 64 81", "90 5F B1 26", "04 0B EF 7A 5D 64 81"};
+String bike[4] = {"04 4B EA 4A 5D 64 81", "04 57 40 42 5D 64 80", "04 53 55 C2 5C 64 81", "04 25 53 C2 5C 64 80"};
+String car[4] = {"04 F2 EA BA 5C 64 80", "04 A5 EB BA 5C 64 80", "04 B1 2E 22 A8 64 80", "04 BA EC 7A 5D 64 80"};
 
 void setup() {
-  analogWrite(contrastPin, contrast);
+  pinMode(redLED, OUTPUT);
+  pinMode(greenLED, OUTPUT);
+  pinMode(blueLED, OUTPUT);
+
+  digitalWrite(redLED, LOW);
+  digitalWrite(greenLED, LOW);
+  digitalWrite(blueLED, LOW);
+  
+
   lcd.begin(16, 2); // Initialize the 16x2 LCD
 	lcd.clear();	// Clear any old data displayed on the LCD
   lcd.print("Lane type:");
@@ -32,6 +43,7 @@ void setup() {
 	mfrc522.PCD_Init();		// Init MFRC522
 	delay(4);				// Optional delay. Some board do need more time after init to be ready, see Readme
 
+  digitalWrite(blueLED, HIGH);
   scanLanes();
 }
 
@@ -40,15 +52,12 @@ void loop(){
 }
 
 // Check if address is of road type
-bool checkType(String type[2], String address){
-  return address == type[0] || address == type[1];
+bool checkType(String type[4], String address){
+  return address == type[0] || address == type[1] || address == type[2] || address == type[3];
 }
 
 String getRoadType(String address){
-  if(checkType(green, address)){
-    return "Green";
-  }
-  else if(checkType(pedestrian, address)){
+  if(checkType(pedestrian, address)){
     return "Pedestrian";
   }
   else if(checkType(tram, address)){
@@ -85,10 +94,11 @@ void scanLanes(){
       i--;
 		  continue;
 	  }
-
+    digitalWrite(blueLED, LOW);
     //Output to Serial
     String output = getRoadType(getAddress()) + "," + String(i);
     Serial.println(output);
+    digitalWrite(redLED, HIGH);
 
     //Output to LCD
     lcd.clear();
@@ -98,6 +108,8 @@ void scanLanes(){
     lcd.print(getRoadType(getAddress()));
 
     delay(gameDelay);
+    digitalWrite(redLED, LOW);
   }
   Serial.println("Done");
+  digitalWrite(greenLED, HIGH);
 }
