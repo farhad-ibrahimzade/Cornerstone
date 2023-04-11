@@ -1,9 +1,7 @@
 """This program will run the "Fix the road game" using a GUI powered by Tkinter.
     The program will take input from an Arduino using serial.
     Please check and define the serial port prior to running the code."""
-import time
 import serial
-import PySimpleGUI as gui
 import tkinter as tk
 from PIL import ImageTk, Image
 

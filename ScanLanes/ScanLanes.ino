@@ -2,18 +2,16 @@
 #include <MFRC522.h>
 #include <LiquidCrystal.h> // Library for the LCD
 
-LiquidCrystal lcd(A5, A4, A3, A2, A1, A0); // Initializing the LCD object
-
 #define RST_PIN 9
 #define SS_PIN 10
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
-const int blueLED = 5;
+const int blueLED = 6;
 
-const int redLED = 6;
+const int redLED = 7;
 
-const int greenLED = 7;
+const int greenLED = 5;
 
 const int contrast = 110;
 
@@ -34,10 +32,6 @@ void setup() {
   digitalWrite(greenLED, LOW);
   digitalWrite(blueLED, LOW);
   
-
-  lcd.begin(16, 2); // Initialize the 16x2 LCD
-	lcd.clear();	// Clear any old data displayed on the LCD
-  lcd.print("Lane type:");
 	Serial.begin(9600);		// Initialize serial communications with the PC
 	SPI.begin();			// Init SPI bus
 	mfrc522.PCD_Init();		// Init MFRC522
@@ -99,13 +93,6 @@ void scanLanes(){
     String output = getRoadType(getAddress()) + "," + String(i);
     Serial.println(output);
     digitalWrite(redLED, HIGH);
-
-    //Output to LCD
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Lane type:");
-    lcd.setCursor(0, 1);
-    lcd.print(getRoadType(getAddress()));
 
     delay(gameDelay);
     digitalWrite(redLED, LOW);
