@@ -5,6 +5,15 @@ import serial
 import tkinter as tk
 from PIL import ImageTk, Image
 
+# Import the Data
+from Data.data import CityCost, CityEmissions
+
+cost_unit = "USD per 100 people"
+emissions_unit = "grams of CO2 per mile per 100 people"
+
+cost = [CityCost.boston, CityCost.london, CityCost.tokyo, CityCost.lagos, CityCost.lima]
+emissions = [CityEmissions.boston, CityEmissions.london, CityEmissions.tokyo, CityEmissions.lagos, CityEmissions.lima]
+
 # Make sure the 'COM#' is set according the Windows Device Manager
 serial_port = "COM6"
 ser = serial.Serial()
@@ -24,6 +33,7 @@ _tram = Image.open("Images\\tram.png")
 _ped = Image.open("Images\ped.png")
 _bike = Image.open("Images\\bike.png")
 _bus = Image.open("Images\\bus.png")
+_data = [Image.open(f"Images\\data{i}.png") for i in range(1,15)]
 
 # Prepare the images for use by Tkinter
 start = ImageTk.PhotoImage(_start.resize((500,500)))
@@ -32,9 +42,10 @@ tram = ImageTk.PhotoImage(_tram.resize((200,200)))
 ped = ImageTk.PhotoImage(_ped.resize((200,200)))
 bike = ImageTk.PhotoImage(_bike.resize((200,200)))
 bus = ImageTk.PhotoImage(_bus.resize((200,200)))
+data = [ImageTk.PhotoImage(dat.resize((window.winfo_screenwidth(), window.winfo_screenheight()))) for dat in _data]
 
 # Initialize the road lanes and the layout
-lanes = []
+lanes = ["Car", "Car", "Car", "Car", "Car", "Car"]
 layout = []
 
 def reset_window():
@@ -56,8 +67,8 @@ def start_game(layout: list, ser: serial.Serial, lanes: list):
     reset_window()
     
     lanes = []
-    ser.close()
-    ser = serial.Serial(serial_port, 9800, timeout=1)
+    #ser.close()
+    #ser = serial.Serial(serial_port, 9800, timeout=1)
 
     if layout:
         clear(layout)
@@ -140,20 +151,21 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
 
     reset_window()
     clear(layout)
-    road = get_lanes(ser, lanes)
-    images = [tk.Label(image=get_image(road[0])), tk.Label(image=get_image(road[1])), tk.Label(image=get_image(road[2])),
-                tk.Label(image=get_image(road[3])), tk.Label(image=get_image(road[4])), tk.Label(image=get_image(road[5]))]
+    lanes = ["Car", "Car", "Car", "Car", "Car", "Car"]
+    #lanes = get_lanes(ser, lanes)
+    images = [tk.Label(image=get_image("lanes[0]")), tk.Label(image=get_image(lanes[1])), tk.Label(image=get_image(lanes[2])),
+                tk.Label(image=get_image(lanes[3])), tk.Label(image=get_image(lanes[4])), tk.Label(image=get_image(lanes[5]))]
     for i,img in enumerate(images):
         img.grid(row=2, column=i+1)
 
 
-    text = [tk.Label(text=road[0]), tk.Label(text=road[1]), tk.Label(text=road[2]), 
-            tk.Label(text=road[3]), tk.Label(text=road[4]), tk.Label(text=road[5])]
+    text = [tk.Label(text=lanes[0]), tk.Label(text=lanes[1]), tk.Label(text=lanes[2]), 
+            tk.Label(text=lanes[3]), tk.Label(text=lanes[4]), tk.Label(text=lanes[5])]
 
     for i,txt in enumerate(text):
         txt.grid(row=1, column=i+1)
 
-    buttons = [tk.Button(text="London"), tk.Button(text="Tokyo"), tk.Button(text="Lima"), tk.Button(text="Cairo")]
+    buttons = [tk.Button(text="London", command = lambda: get_london(layout, lanes)), tk.Button(text="Tokyo"), tk.Button(text="Lima"), tk.Button(text="Cairo")]
 
     for i,btn in enumerate(buttons):
         btn.grid(row=3, column=i+1)
@@ -169,6 +181,27 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     layout.extend(text)
     layout.extend(buttons)
     layout.extend(restart)
+
+def get_london(layout: list, lanes: list):
+    reset_window()
+    clear(layout)
+
+    background = tk.Label(image=data[3])
+    background.place(x=0, y=0, relwidth=1, relheight=1)
+    em = emissions[1]["car"]
+    text = tk.Label(text = f"London car emissions are {em} {emissions_unit}")
+    text.grid(row = 1, column = 1)
+
+    window.grid_columnconfigure((0, 2), weight=1)
+    window.grid_rowconfigure((0), weight=1)
+    window.grid_rowconfigure((2), weight=2)
+
+
+def calculate_cost(lanes: list) -> list:
+    return CityEmissions
+
+def calculate_emissions(lanes: list):
+    pass
 
 def pack(layout: list):
     """This function packs all the labels in the layout.
