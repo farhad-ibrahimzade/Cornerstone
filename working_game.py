@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import ImageTk, Image
 
+from Data.cities import Cities
 # Import the Data
 from Data.data import CityCost, CityEmissions, RoadCapacity
 
@@ -63,14 +64,14 @@ data = [ImageTk.PhotoImage(dat.resize((window.winfo_screenwidth(), window.winfo_
 road = ImageTk.PhotoImage(_road.resize((window.winfo_screenwidth(), window.winfo_screenheight())))
 
 # Initialize the road lanes and the layout
-lanes = ["Car", "Car", "Car", "Car", "Car", "Car"]
+lanes = []
 layout = []
 
 def reset_window():
     """This function resets the window grid
     """
-    window.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=0)
-    window.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=0)
+    window.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20), weight=0)
+    window.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20), weight=0)
 
 def start_game(layout: list, ser: serial.Serial, lanes: list):
     """This function begins the game and welcomes the user.
@@ -88,23 +89,33 @@ def start_game(layout: list, ser: serial.Serial, lanes: list):
     #ser.close() TODO: remove once done testing
     #ser = serial.Serial(serial_port, 9800, timeout=1)
 
-    if layout:
-        clear(layout)
+    clear(layout)
 
-    label1 = tk.Label(image=start)
+    background = tk.Label(image=data[5])
+    background.place(x=0, y=0, relwidth=1, relheight=1)
 
-    label = tk.Label(text = "Welcome to the fix the Road Game")
+    text = [tk.Label(text = "Welcome to the fix the Road Game", font=("Arial", 22)),
+                tk.Label(text = "Scan and place your lanes on the road", font=("Arial", 22)),
+                tk.Label(text = "Please click the button below when done scanning", font=("Arial", 22))]
 
-    button = tk.Button(text="Done Scanning", command = lambda: display_road(layout, ser, lanes))
+    button = tk.Button(text="Done Scanning", command = lambda: display_road(layout, ser, lanes), font=("Arial", 22))
 
-    layout = [label1, label, button]
+    text[0].config(bg= "white", fg= "black")
+    text[1].config(bg= "white", fg= "black")
+    text[2].config(bg= "white", fg= "black")
 
-    layout[0].grid(row=1, column=1)
-    layout[1].grid(row=2, column=1)
-    layout[2].grid(row=3, column=1)
+    text[0].grid(row=1, column=1)
+    text[1].grid(row=2, column=1)
+    text[2].grid(row=3, column=1)
+    button.grid(row=7, column=1)
+
+    layout.append(background)
+    layout.extend(text)
+    layout.append(button)
 
     window.grid_columnconfigure((0, 2), weight=1)
-    window.grid_rowconfigure((0, 4), weight=1)
+    window.grid_rowconfigure((4, 5, 6), weight=1)
+    window.grid_rowconfigure((0, 8), weight=2) 
 
 def get_image(string: str) -> ImageTk.PhotoImage:
     """This function returns an image for the appropriate lane.
@@ -173,8 +184,8 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     road_background = tk.Label(image=road)
     road_background.place(x=0, y=0, relwidth=1, relheight=1)
 
-    lanes = ["Bike", "Bike", "Bike", "Bike", "Bike", "Bike"]
-    #lanes = get_lanes(ser, lanes)
+    lanes = ["Pedestrian", "Bike", "Car", "Tram", "Bike", "Pedestrian"]
+    #lanes = get_lanes(ser, lanes) TODO: fix if lanes not empty
 
     top_text = tk.Label(text = "Thank you for scanning, here is your road: ", font=("Arial", 22))
 
@@ -248,11 +259,11 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     window.grid_rowconfigure((13), weight=1)
 
     city_buttons = [tk.Button(text ="Restart game", font=("Arial", 15), command  = lambda: start_game(layout, ser, lanes)),
-                    tk.Button(text="Boston", font=("Arial", 15), command = lambda: get_boston(layout, lanes)),
-                    tk.Button(text="London", font=("Arial", 15), command = lambda: get_london(layout, lanes)),
-                    tk.Button(text="Tokyo", font=("Arial", 15),  command = lambda: get_tokyo(layout, lanes)), 
-                    tk.Button(text="Lagos", font=("Arial", 15), command = lambda: get_lagos(layout, lanes)),
-                    tk.Button(text="Lima", font=("Arial", 15), command = lambda: get_lima(layout, lanes))]
+                    tk.Button(text="Boston", font=("Arial", 15), command = lambda: get_boston(layout, ser, lanes)),
+                    tk.Button(text="London", font=("Arial", 15), command = lambda: get_london(layout, ser, lanes)),
+                    tk.Button(text="Tokyo", font=("Arial", 15),  command = lambda: get_tokyo(layout, ser, lanes)), 
+                    tk.Button(text="Lagos", font=("Arial", 15), command = lambda: get_lagos(layout, ser, lanes)),
+                    tk.Button(text="Lima", font=("Arial", 15), command = lambda: get_lima(layout, ser, lanes))]
 
     for i,btn in enumerate(city_buttons):
         btn.config(bg= "#747473", fg= "white")
@@ -270,19 +281,130 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     layout.append(globe_text)
     layout.extend(city_buttons)
 
-def get_london(layout: list, lanes: list):
+def get_boston(layout: list, ser: serial.Serial, lanes: list):
+    reset_window()
+    clear(layout)
+
+    background = tk.Label(image=data[4])
+    background.place(x=0, y=0, relwidth=1, relheight=1)
+    text = [tk.Label(text = f"The emissions of your road in Boston would be {city_emissions(lanes, Cities.boston):,} {emissions_unit}", font=("Arial", 18)),
+            tk.Label(text = f"The cost of your road in Boston would be {city_cost(lanes, Cities.boston):,} {cost_unit}", font=("Arial", 18))]
+    text[0].config(bg= "white", fg= "black")
+    text[1].config(bg= "white", fg= "black")
+    text[0].grid(row = 5, column = 1)
+    text[1].grid(row = 6, column = 1)
+
+    button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
+
+    button.grid(row = 1, column = 1)
+
+    layout.append(background)
+    layout.extend(text)
+    layout.append(button)
+    
+    window.grid_columnconfigure((0, 2), weight=1)
+    window.grid_rowconfigure((2, 3, 4), weight=2)
+    window.grid_rowconfigure((0, 7), weight=3)
+
+def get_london(layout: list, ser: serial.Serial, lanes: list):
     reset_window()
     clear(layout)
 
     background = tk.Label(image=data[3])
     background.place(x=0, y=0, relwidth=1, relheight=1)
-    em = emissions[1]["car"]
-    text = tk.Label(text = f"London car emissions are {em} {emissions_unit}")
-    text.grid(row = 1, column = 1)
+    text = [tk.Label(text = f"The emissions of your road in London would be {city_emissions(lanes, Cities.london):,} {emissions_unit}", font=("Arial", 25)),
+            tk.Label(text = f"The cost of your road in London would be {city_cost(lanes, Cities.london):,} {cost_unit}", font=("Arial", 25))]
+    text[0].config(bg= "white", fg= "black")
+    text[1].config(bg= "white", fg= "black")
+    text[0].grid(row = 1, column = 1)
+    text[1].grid(row = 2, column = 1)
 
+    button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
+
+    button.grid(row = 10, column = 1)
+
+    layout.append(background)
+    layout.extend(text)
+    layout.append(button)
+    
     window.grid_columnconfigure((0, 2), weight=1)
-    window.grid_rowconfigure((0), weight=1)
-    window.grid_rowconfigure((2), weight=2)
+    window.grid_rowconfigure((3, 4, 5, 6, 7, 9), weight=1)
+    window.grid_rowconfigure((0, 11), weight=3)
+
+def get_tokyo(layout: list, ser: serial.Serial, lanes: list):
+    reset_window()
+    clear(layout)
+
+    background = tk.Label(image=data[13])
+    background.place(x=0, y=0, relwidth=1, relheight=1)
+    text = [tk.Label(text = f"The emissions of your road in Tokyo would be {city_emissions(lanes, Cities.tokyo):,} {emissions_unit}", font=("Arial", 25)),
+            tk.Label(text = f"The cost of your road in Tokyo would be {city_cost(lanes, Cities.tokyo):,} {cost_unit}", font=("Arial", 25))]
+    text[0].config(bg= "white", fg= "black")
+    text[1].config(bg= "white", fg= "black")
+    text[0].grid(row = 1, column = 1)
+    text[1].grid(row = 2, column = 1)
+
+    button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
+
+    button.grid(row = 9, column = 1)
+
+    layout.append(background)
+    layout.extend(text)
+    layout.append(button)
+    
+    window.grid_columnconfigure((0, 2), weight=1)
+    window.grid_rowconfigure((3, 4, 5, 6, 7, 8), weight=2)
+    window.grid_rowconfigure((0, 10), weight=3)
+
+def get_lagos(layout: list, ser: serial.Serial, lanes: list):
+    reset_window()
+    clear(layout)
+
+    background = tk.Label(image=data[11])
+    background.place(x=0, y=0, relwidth=1, relheight=1)
+    text = [tk.Label(text = f"The emissions of your road in Lagos would be {city_emissions(lanes, Cities.lagos):,} {emissions_unit}", font=("Arial", 21)),
+            tk.Label(text = f"The cost of your road in Lagos would be {city_cost(lanes, Cities.lagos):,} {cost_unit}", font=("Arial", 21))]
+    text[0].config(bg= "white", fg= "black")
+    text[1].config(bg= "white", fg= "black")
+    text[0].grid(row = 6, column = 1)
+    text[1].grid(row = 7, column = 1)
+
+    button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
+
+    button.grid(row = 1, column = 1)
+
+    layout.append(background)
+    layout.extend(text)
+    layout.append(button)
+    
+    window.grid_columnconfigure((0, 2), weight=1)
+    window.grid_rowconfigure((3, 4, 5), weight=1)
+    window.grid_rowconfigure((0, 8, 9, 10), weight=3)
+
+def get_lima(layout: list, ser: serial.Serial, lanes: list):
+    reset_window()
+    clear(layout)
+
+    background = tk.Label(image=data[8])
+    background.place(x=0, y=0, relwidth=1, relheight=1)
+    text = [tk.Label(text = f"The emissions of your road in Lima would be {city_emissions(lanes, Cities.lima):,} {emissions_unit}", font=("Arial", 22)),
+            tk.Label(text = f"The cost of your road in Lima would be {city_cost(lanes, Cities.lima):,} {cost_unit}", font=("Arial", 22))]
+    text[0].config(bg= "white", fg= "black")
+    text[1].config(bg= "white", fg= "black")
+    text[0].grid(row = 9, column = 1)
+    text[1].grid(row = 10, column = 1)
+
+    button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
+
+    button.grid(row = 1, column = 1)
+
+    layout.append(background)
+    layout.extend(text)
+    layout.append(button)
+    
+    window.grid_columnconfigure((0, 2), weight=1)
+    window.grid_rowconfigure((3, 4, 5, 6), weight=2)
+    window.grid_rowconfigure((0, 11), weight=3)
 
 def road_cost(lanes: str) -> int:
     result = 0
@@ -334,6 +456,20 @@ def average_emissions(lane: str) -> int:
         total_emissions += em[lane]
     
     return int(total_emissions / len(emissions))
+
+def city_emissions(lanes: list, city: int) -> int:
+    result = 0
+    for lane in lanes:
+        result += emissions[city][lane]
+
+    return int(result / len(lanes))
+
+def city_cost(lanes: list, city: int) -> int:
+    result = 0
+    for lane in lanes:
+        result += cost[city][lane]
+
+    return int(result / len(lanes))
 
 def get_progress_score(score: int):
     if score < 40:

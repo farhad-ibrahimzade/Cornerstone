@@ -12,7 +12,7 @@ class CityCost:
     london = {"Bike": BikeCost.london, "Bus": BusCost.london, "Car": CarCost.london,
                 "Tram": TramCost.london, "Pedestrian": PedestrianCost.london}
     tokyo = {"Bike": BikeCost.tokyo, "Bus": BusCost.tokyo, "Car": CarCost.tokyo,
-                "tram": TramCost.tokyo, "pedestrian": PedestrianCost.tokyo}
+                "Tram": TramCost.tokyo, "Pedestrian": PedestrianCost.tokyo}
     lagos = {"Bike": BikeCost.lagos, "Bus": BusCost.lagos, "Car": CarCost.lagos,
                 "Tram": TramCost.lagos, "Pedestrian": PedestrianCost.lagos}
     lima = {"Bike": BikeCost.lima, "Bus": BusCost.lima, "Car": CarCost.lima,
