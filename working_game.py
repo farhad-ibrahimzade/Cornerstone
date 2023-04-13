@@ -187,7 +187,7 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     lanes = ["Pedestrian", "Bike", "Car", "Tram", "Bike", "Pedestrian"]
     #lanes = get_lanes(ser, lanes) TODO: fix if lanes not empty
 
-    top_text = tk.Label(text = "Thank you for scanning, here is your road: ", font=("Arial", 22))
+    top_text = tk.Label(text = "Thank you for scanning, here is your road: ", font=("Arial", 25))
 
     top_text.config(bg= "#747473", fg= "white")
 
@@ -250,7 +250,7 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
 
     window.grid_rowconfigure((11), weight=1)
 
-    globe_text = tk.Label(text = "See how your road performs across the globe:", font=("Arial", 15))
+    globe_text = tk.Label(text = "See how your road performs across the globe:", font=("Arial", 17))
 
     globe_text.config(bg= "#747473", fg= "white")
 
