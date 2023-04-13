@@ -13,5 +13,5 @@ class TramEmissions(IntEnum):
     boston = 491
     london = 682
     tokyo = 2952
-    lagos = 0
+    lagos = 500
     lima = 2124

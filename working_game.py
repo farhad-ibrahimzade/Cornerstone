@@ -2,17 +2,24 @@
     The program will take input from an Arduino using serial.
     Please check and define the serial port prior to running the code."""
 import serial
+import numpy as np
 import tkinter as tk
+from tkinter import ttk
 from PIL import ImageTk, Image
 
 # Import the Data
-from Data.data import CityCost, CityEmissions
+from Data.data import CityCost, CityEmissions, RoadCapacity
 
 cost_unit = "USD per 100 people"
-emissions_unit = "grams of CO2 per mile per 100 people"
+emissions_unit = "g CO2/mi per 100 people"
+capacity_unit = "people per hour"
 
 cost = [CityCost.boston, CityCost.london, CityCost.tokyo, CityCost.lagos, CityCost.lima]
 emissions = [CityEmissions.boston, CityEmissions.london, CityEmissions.tokyo, CityEmissions.lagos, CityEmissions.lima]
+
+capacity_range = np.linspace(1000, 15000, 100)
+cost_range = np.linspace(0, 214000000, 100)
+emissions_range = np.linspace(0, 18149, 100)
 
 # Make sure the 'COM#' is set according the Windows Device Manager
 serial_port = "COM6"
@@ -26,6 +33,15 @@ window = tk.Tk()
 # Make the window cover the whole screen
 window.geometry("%dx%d" % (window.winfo_screenwidth(), window.winfo_screenheight()))
 
+style = ttk.Style()
+style.theme_use('clam') 
+# Self test for each subject,'winnative','clam','alt','default','classic' Test successful. 
+# windows theme:('winnative','clam','alt','default','classic','vista','xpnative')
+
+style.configure("1.Horizontal.TProgressbar", troughcolor ='gray', background='red') 
+style.configure("2.Horizontal.TProgressbar", troughcolor ='gray', background='yellow')
+style.configure("3.Horizontal.TProgressbar", troughcolor ='gray', background='green')
+
 # Initialize all the images
 _start = Image.open("Images\city.png")
 _car = Image.open("Images\car.png")
@@ -34,15 +50,17 @@ _ped = Image.open("Images\ped.png")
 _bike = Image.open("Images\\bike.png")
 _bus = Image.open("Images\\bus.png")
 _data = [Image.open(f"Images\\data{i}.png") for i in range(1,15)]
+_road = Image.open("Images\\road.png")
 
 # Prepare the images for use by Tkinter
 start = ImageTk.PhotoImage(_start.resize((500,500)))
-car = ImageTk.PhotoImage(_car.resize((200,200)))
-tram = ImageTk.PhotoImage(_tram.resize((200,200)))
-ped = ImageTk.PhotoImage(_ped.resize((200,200)))
-bike = ImageTk.PhotoImage(_bike.resize((200,200)))
-bus = ImageTk.PhotoImage(_bus.resize((200,200)))
+car = ImageTk.PhotoImage(_car.resize((240,240)))
+tram = ImageTk.PhotoImage(_tram.resize((240,240)))
+ped = ImageTk.PhotoImage(_ped.resize((240,240)))
+bike = ImageTk.PhotoImage(_bike.resize((240,240)))
+bus = ImageTk.PhotoImage(_bus.resize((240,240)))
 data = [ImageTk.PhotoImage(dat.resize((window.winfo_screenwidth(), window.winfo_screenheight()))) for dat in _data]
+road = ImageTk.PhotoImage(_road.resize((window.winfo_screenwidth(), window.winfo_screenheight())))
 
 # Initialize the road lanes and the layout
 lanes = ["Car", "Car", "Car", "Car", "Car", "Car"]
@@ -67,7 +85,7 @@ def start_game(layout: list, ser: serial.Serial, lanes: list):
     reset_window()
     
     lanes = []
-    #ser.close()
+    #ser.close() TODO: remove once done testing
     #ser = serial.Serial(serial_port, 9800, timeout=1)
 
     if layout:
@@ -151,36 +169,106 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
 
     reset_window()
     clear(layout)
-    lanes = ["Car", "Car", "Car", "Car", "Car", "Car"]
+
+    road_background = tk.Label(image=road)
+    road_background.place(x=0, y=0, relwidth=1, relheight=1)
+
+    lanes = ["Bike", "Bike", "Bike", "Bike", "Bike", "Bike"]
     #lanes = get_lanes(ser, lanes)
-    images = [tk.Label(image=get_image("lanes[0]")), tk.Label(image=get_image(lanes[1])), tk.Label(image=get_image(lanes[2])),
+
+    top_text = tk.Label(text = "Thank you for scanning, here is your road: ", font=("Arial", 22))
+
+    top_text.config(bg= "#747473", fg= "white")
+
+    top_text.grid(row = 1, column = 2, columnspan = 4)
+
+    window.grid_rowconfigure((2), weight=1)
+
+    # text = [tk.Label(text=lanes[0], font = ("Arial", 15)), tk.Label(text=lanes[1], font = ("Arial", 15)), tk.Label(text=lanes[2], font = ("Arial", 15)), 
+    #         tk.Label(text=lanes[3], font = ("Arial", 15)), tk.Label(text=lanes[4], font = ("Arial", 15)), tk.Label(text=lanes[5], font = ("Arial", 15))]
+
+    # for i,txt in enumerate(text):
+    #     txt.config(bg= "#747473", fg= "white")
+    #     txt.grid(row=3, column=i+1)
+
+    window.grid_rowconfigure((4), weight=1)
+
+    images = [tk.Label(image=get_image(lanes[0])), tk.Label(image=get_image(lanes[1])), tk.Label(image=get_image(lanes[2])),
                 tk.Label(image=get_image(lanes[3])), tk.Label(image=get_image(lanes[4])), tk.Label(image=get_image(lanes[5]))]
     for i,img in enumerate(images):
-        img.grid(row=2, column=i+1)
+        img.config(bg= "#747473", fg= "white")
+        img.grid(row=5, column=i+1)
 
+    window.grid_rowconfigure((6), weight=1)
 
-    text = [tk.Label(text=lanes[0]), tk.Label(text=lanes[1]), tk.Label(text=lanes[2]), 
-            tk.Label(text=lanes[3]), tk.Label(text=lanes[4]), tk.Label(text=lanes[5])]
+    display_data = [tk.Label(text = f"Average emissions: {road_emissions(lanes):,} {emissions_unit}", font=("Arial", 15)),
+                    tk.Label(text = f"Average capacity: {road_capacity(lanes):,} {capacity_unit}", font=("Arial", 15)),
+                    tk.Label(text = f"Average cost: {road_cost(lanes):,} {cost_unit}", font=("Arial", 15))]
 
-    for i,txt in enumerate(text):
-        txt.grid(row=1, column=i+1)
+    for dat in display_data:
+        dat.config(bg= "#747473", fg= "white")
 
-    buttons = [tk.Button(text="London", command = lambda: get_london(layout, lanes)), tk.Button(text="Tokyo"), tk.Button(text="Lima"), tk.Button(text="Cairo")]
+    display_data[0].grid(row = 7, column= 1, columnspan= 2)
+    display_data[1].grid(row = 7, column= 3, columnspan= 2)
+    display_data[2].grid(row = 7, column= 5, columnspan= 2)
 
-    for i,btn in enumerate(buttons):
-        btn.grid(row=3, column=i+1)
+    window.grid_rowconfigure((8), weight=1)
 
-    restart = [tk.Button(text ="Restart", command  = lambda: start_game(layout, ser, lanes))]
+    scores = [tk.Label(text=f"You scored {get_emissions_score(lanes)}% in emissions", font = ("Arial", 15)), 
+              tk.Label(text=f"You scored {get_capacity_score(lanes)}% in capacity", font = ("Arial", 15)), 
+              tk.Label(text=f"You scored {get_cost_score(lanes)}% in cost", font = ("Arial", 15))]
 
-    restart[0].grid(row=4)
+    for i,score in enumerate(scores):
+        score.config(bg= "#747473", fg= "white")
 
-    window.grid_columnconfigure((0, 7), weight=1)
-    window.grid_rowconfigure((0, 5), weight=1)
+    scores[0].grid(row = 9, column= 1, columnspan= 2)
+    scores[1].grid(row = 9, column= 3, columnspan= 2)
+    scores[2].grid(row = 9, column= 5, columnspan= 2)
+    
+    score_bars = [ttk.Progressbar(window, style= get_progress_score(get_emissions_score(lanes)), orient = "horizontal", length = 200, mode = "determinate"), 
+                ttk.Progressbar(window, style= get_progress_score(get_capacity_score(lanes)), orient = "horizontal", length = 200, mode = "determinate"),
+                ttk.Progressbar(window, style= get_progress_score(get_cost_score(lanes)), orient = "horizontal", length = 200, mode = "determinate")]
 
+    score_bars[0]["value"] = get_emissions_score(lanes)
+    score_bars[1]["value"] = get_capacity_score(lanes)
+    score_bars[2]["value"] = get_cost_score(lanes)
+
+    score_bars[0].grid(row = 10, column= 1, columnspan= 2)
+    score_bars[1].grid(row = 10, column= 3, columnspan= 2)
+    score_bars[2].grid(row = 10, column= 5, columnspan= 2)
+
+    window.grid_rowconfigure((11), weight=1)
+
+    globe_text = tk.Label(text = "See how your road performs across the globe:", font=("Arial", 15))
+
+    globe_text.config(bg= "#747473", fg= "white")
+
+    globe_text.grid(row = 12, column=3, columnspan=2)
+
+    window.grid_rowconfigure((13), weight=1)
+
+    city_buttons = [tk.Button(text ="Restart game", font=("Arial", 15), command  = lambda: start_game(layout, ser, lanes)),
+                    tk.Button(text="Boston", font=("Arial", 15), command = lambda: get_boston(layout, lanes)),
+                    tk.Button(text="London", font=("Arial", 15), command = lambda: get_london(layout, lanes)),
+                    tk.Button(text="Tokyo", font=("Arial", 15),  command = lambda: get_tokyo(layout, lanes)), 
+                    tk.Button(text="Lagos", font=("Arial", 15), command = lambda: get_lagos(layout, lanes)),
+                    tk.Button(text="Lima", font=("Arial", 15), command = lambda: get_lima(layout, lanes))]
+
+    for i,btn in enumerate(city_buttons):
+        btn.config(bg= "#747473", fg= "white")
+        btn.grid(row=14, column=i+1)
+
+    window.grid_columnconfigure((0, 7), weight=3)
+    window.grid_rowconfigure((0, 15), weight=3)
+
+    layout.append(road_background)
+    layout.append(top_text)
     layout.extend(images)
-    layout.extend(text)
-    layout.extend(buttons)
-    layout.extend(restart)
+    layout.extend(display_data)
+    layout.extend(scores)
+    layout.extend(score_bars)
+    layout.append(globe_text)
+    layout.extend(city_buttons)
 
 def get_london(layout: list, lanes: list):
     reset_window()
@@ -196,12 +284,87 @@ def get_london(layout: list, lanes: list):
     window.grid_rowconfigure((0), weight=1)
     window.grid_rowconfigure((2), weight=2)
 
+def road_cost(lanes: str) -> int:
+    result = 0
+    for lane in lanes:
+        result += average_cost(lane)
 
-def calculate_cost(lanes: list) -> list:
-    return CityEmissions
+    return int(result / len(lanes))
+    
+def road_capacity(lanes: str):
+    result = 0
+    for lane in lanes:
+        result += RoadCapacity.capacity[lane]
 
-def calculate_emissions(lanes: list):
-    pass
+    return int(result / len(lanes))
+
+def road_emissions(lanes: str) -> int:
+    result = 0
+    for lane in lanes:
+        result += average_emissions(lane)
+
+    return int(result / len(lanes))
+
+def average_cost(lane: str) -> int:
+    """This function returns the average cost per 100 people for a vehicle type
+
+    Args:
+        lane (str): type of vehicle
+
+    Returns:
+        int: average cost
+    """
+    total_cost = 0
+    for cos in cost:
+        total_cost += cos[lane]
+    
+    return int(total_cost / len(cost))
+
+def average_emissions(lane: str) -> int:
+    """This function returns the average emissions per 100 people for a vehicle type
+
+    Args:
+        lane (str): type of vehicle
+
+    Returns:
+        int: average emissions
+    """
+    total_emissions = 0
+    for em in emissions:
+        total_emissions += em[lane]
+    
+    return int(total_emissions / len(emissions))
+
+def get_progress_score(score: int):
+    if score < 40:
+        return "1.Horizontal.TProgressbar"
+
+    elif score >= 40 and score <=60:
+        return "2.Horizontal.TProgressbar"
+
+    else:
+        return "3.Horizontal.TProgressbar"
+
+def get_capacity_score(lanes: list):
+    capacity = road_capacity(lanes)
+
+    for i, cap in enumerate(capacity_range):
+        if capacity < cap:
+            return i
+
+def get_cost_score(lanes: list):
+    cost = road_cost(lanes)
+
+    for i, cos in enumerate(cost_range):
+        if cost < cos:
+            return 100 - i
+        
+def get_emissions_score(lanes: list):
+    emissions = road_emissions(lanes)
+
+    for i, em in enumerate(emissions_range):
+        if emissions < em:
+            return 100 - i
 
 def pack(layout: list):
     """This function packs all the labels in the layout.

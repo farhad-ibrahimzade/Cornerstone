@@ -7,26 +7,31 @@ from Data.pedestrians import PedestrianCost, PedestrianEmissions
 
 class CityCost:
     # Cost to transport 100 people by all types of transport in various cities in USD
-    boston = {"bike": BikeCost.boston, "bus": BusCost.boston, "car": CarCost.boston,
-                "tram": TramCost.boston, "pedestrian": PedestrianCost.boston}
-    london = {"bike": BikeCost.london, "bus": BusCost.london, "car": CarCost.london,
-                "tram": TramCost.london, "pedestrian": PedestrianCost.london}
-    tokyo = {"bike": BikeCost.tokyo, "bus": BusCost.tokyo, "car": CarCost.tokyo,
+    boston = {"Bike": BikeCost.boston, "Bus": BusCost.boston, "Car": CarCost.boston,
+                "Tram": TramCost.boston, "Pedestrian": PedestrianCost.boston}
+    london = {"Bike": BikeCost.london, "Bus": BusCost.london, "Car": CarCost.london,
+                "Tram": TramCost.london, "Pedestrian": PedestrianCost.london}
+    tokyo = {"Bike": BikeCost.tokyo, "Bus": BusCost.tokyo, "Car": CarCost.tokyo,
                 "tram": TramCost.tokyo, "pedestrian": PedestrianCost.tokyo}
-    lagos = {"bike": BikeCost.lagos, "bus": BusCost.lagos, "car": CarCost.lagos,
-                "tram": TramCost.lagos, "pedestrian": PedestrianCost.lagos}
-    lima = {"bike": BikeCost.lima, "bus": BusCost.lima, "car": CarCost.lima,
-                "tram": TramCost.lima, "pedestrian": PedestrianCost.lima}
+    lagos = {"Bike": BikeCost.lagos, "Bus": BusCost.lagos, "Car": CarCost.lagos,
+                "Tram": TramCost.lagos, "Pedestrian": PedestrianCost.lagos}
+    lima = {"Bike": BikeCost.lima, "Bus": BusCost.lima, "Car": CarCost.lima,
+                "Tram": TramCost.lima, "Pedestrian": PedestrianCost.lima}
 
 class CityEmissions:
     # Emissions from transporting 100 people by all types of transport in various cities in USD
-    boston = {"bike": BikeEmissions.boston, "bus": BusEmissions.boston, "car": CarEmissions.boston,
-                "tram": TramEmissions.boston, "pedestrian": PedestrianEmissions.boston}
-    london = {"bike": BikeEmissions.london, "bus": BusEmissions.london, "car": CarEmissions.london,
-                "tram": TramEmissions.london, "pedestrian": PedestrianEmissions.london}
-    tokyo = {"bike": BikeEmissions.tokyo, "bus": BusEmissions.tokyo, "car": CarEmissions.tokyo,
-                "tram": TramEmissions.tokyo, "pedestrian": PedestrianEmissions.tokyo}
-    lagos = {"bike": BikeEmissions.lagos, "bus": BusEmissions.lagos, "car": CarEmissions.lagos,
-                "tram": TramEmissions.lagos, "pedestrian": PedestrianEmissions.lagos}
-    lima = {"bike": BikeEmissions.lima, "bus": BusEmissions.lima, "car": CarEmissions.lima,
-                "tram": TramEmissions.lima, "pedestrian": PedestrianEmissions.lima}
+    boston = {"Bike": BikeEmissions.boston, "Bus": BusEmissions.boston, "Car": CarEmissions.boston,
+                "Tram": TramEmissions.boston, "Pedestrian": PedestrianEmissions.boston}
+    london = {"Bike": BikeEmissions.london, "Bus": BusEmissions.london, "Car": CarEmissions.london,
+                "Tram": TramEmissions.london, "Pedestrian": PedestrianEmissions.london}
+    tokyo = {"Bike": BikeEmissions.tokyo, "Bus": BusEmissions.tokyo, "Car": CarEmissions.tokyo,
+                "Tram": TramEmissions.tokyo, "Pedestrian": PedestrianEmissions.tokyo}
+    lagos = {"Bike": BikeEmissions.lagos, "Bus": BusEmissions.lagos, "Car": CarEmissions.lagos,
+                "Tram": TramEmissions.lagos, "Pedestrian": PedestrianEmissions.lagos}
+    lima = {"Bike": BikeEmissions.lima, "Bus": BusEmissions.lima, "Car": CarEmissions.lima,
+                "Tram": TramEmissions.lima, "Pedestrian": PedestrianEmissions.lima}
+
+class RoadCapacity:
+    # Capacity of lane in people per hour
+    capacity = {"Bike": 7500, "Bus": 6000, "Car": 1000, "Tram": 15000, "Pedestrian": 9000}
+
