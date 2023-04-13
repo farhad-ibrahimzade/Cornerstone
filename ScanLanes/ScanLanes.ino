@@ -15,7 +15,7 @@ const int greenLED = 5;
 
 const int contrast = 110;
 
-const int gameDelay = 500;
+const int gameDelay = 1500;
 
 String pedestrian[4] = {"04 2B 60 A2 5C 64 81", "04 20 53 C2 5C 64 80", "04 4C 51 C2 5C 64 81", "04 F1 18 42 5D 64 80"};
 String tram[4] = {"04 39 3C 42 5D 64 81", "04 52 40 42 5D 64 80", "04 EF 14 42 5D 64 80", "04 0C EF 7A 5D 64 81"};

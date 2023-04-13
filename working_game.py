@@ -19,11 +19,11 @@ cost = [CityCost.boston, CityCost.london, CityCost.tokyo, CityCost.lagos, CityCo
 emissions = [CityEmissions.boston, CityEmissions.london, CityEmissions.tokyo, CityEmissions.lagos, CityEmissions.lima]
 
 capacity_range = np.linspace(1000, 15000, 100)
-cost_range = np.linspace(0, 214000000, 100)
-emissions_range = np.linspace(0, 18149, 100)
+cost_range = np.linspace(0, 60000000, 100)
+emissions_range = np.linspace(0, 18149, 100) #18149
 
 # Make sure the 'COM#' is set according the Windows Device Manager
-serial_port = "COM6"
+serial_port = "COM3"
 ser = serial.Serial()
 
 # Create a new window
@@ -86,8 +86,8 @@ def start_game(layout: list, ser: serial.Serial, lanes: list):
     reset_window()
     
     lanes = []
-    #ser.close() TODO: remove once done testing
-    #ser = serial.Serial(serial_port, 9800, timeout=1)
+    ser.close() #TODO: remove once done testing
+    ser = serial.Serial(serial_port, 9800, timeout=1)
 
     clear(layout)
 
@@ -184,8 +184,9 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     road_background = tk.Label(image=road)
     road_background.place(x=0, y=0, relwidth=1, relheight=1)
 
-    lanes = ["Pedestrian", "Bike", "Car", "Tram", "Bike", "Pedestrian"]
-    #lanes = get_lanes(ser, lanes) TODO: fix if lanes not empty
+    #lanes = ["Pedestrian", "Bike", "Car", "Tram", "Bike", "Pedestrian"]
+    if len(lanes) == 0:
+        lanes = get_lanes(ser, lanes) #TODO: fix if lanes not empty
 
     top_text = tk.Label(text = "Thank you for scanning, here is your road: ", font=("Arial", 25))
 
@@ -418,7 +419,7 @@ def road_capacity(lanes: str):
     for lane in lanes:
         result += RoadCapacity.capacity[lane]
 
-    return int(result / len(lanes))
+    return int(result)
 
 def road_emissions(lanes: str) -> int:
     result = 0
@@ -481,11 +482,11 @@ def get_progress_score(score: int):
     else:
         return "3.Horizontal.TProgressbar"
 
-def get_capacity_score(lanes: list):
-    capacity = road_capacity(lanes)
+def get_capacity_score(lanes: list) -> int:
+    capacity = road_capacity(lanes) / 6
 
     for i, cap in enumerate(capacity_range):
-        if capacity < cap:
+        if capacity <= cap:
             return i
 
 def get_cost_score(lanes: list):
@@ -493,10 +494,10 @@ def get_cost_score(lanes: list):
 
     for i, cos in enumerate(cost_range):
         if cost < cos:
-            return 100 - i
+            return 100-i
         
 def get_emissions_score(lanes: list):
-    emissions = road_emissions(lanes)
+    emissions = road_emissions(lanes) 
 
     for i, em in enumerate(emissions_range):
         if emissions < em:
