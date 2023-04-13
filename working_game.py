@@ -1,26 +1,31 @@
 """This program will run the "Fix the road game" using a GUI powered by Tkinter.
     The program will take input from an Arduino using serial.
     Please check and define the serial port prior to running the code."""
+
 import serial
 import numpy as np
 import tkinter as tk
 from tkinter import ttk
 from PIL import ImageTk, Image
 
-from Data.cities import Cities
 # Import the Data
+from Data.cities import Cities
 from Data.data import CityCost, CityEmissions, RoadCapacity
 
+# Units for data
 cost_unit = "USD per 100 people"
 emissions_unit = "g CO2/mi per 100 people"
 capacity_unit = "people per hour"
 
+# Lists containing data dictionaries
 cost = [CityCost.boston, CityCost.london, CityCost.tokyo, CityCost.lagos, CityCost.lima]
-emissions = [CityEmissions.boston, CityEmissions.london, CityEmissions.tokyo, CityEmissions.lagos, CityEmissions.lima]
+emissions = [CityEmissions.boston, CityEmissions.london, CityEmissions.tokyo, 
+                CityEmissions.lagos, CityEmissions.lima]
 
+# Ranges of data for score calculation
 capacity_range = np.linspace(1000, 15000, 100)
-cost_range = np.linspace(0, 60000000, 100)
-emissions_range = np.linspace(0, 18149, 100) #18149
+cost_range = np.linspace(0, 6000000, 100)
+emissions_range = np.linspace(0, 18149, 100)
 
 # Make sure the 'COM#' is set according the Windows Device Manager
 serial_port = "COM3"
@@ -29,16 +34,17 @@ ser = serial.Serial()
 # Create a new window
 window = tk.Tk()
 
+# Optional full screen window mode, uncomment to enable
 #window.attributes('-fullscreen',True)
 
-# Make the window cover the whole screen
+# Make the window cover the whole screen (but not in full screen mode)
 window.geometry("%dx%d" % (window.winfo_screenwidth(), window.winfo_screenheight()))
 
+# Create a style for the progress bar
 style = ttk.Style()
-style.theme_use('clam') 
-# Self test for each subject,'winnative','clam','alt','default','classic' Test successful. 
-# windows theme:('winnative','clam','alt','default','classic','vista','xpnative')
+style.theme_use('clam')
 
+# Configure styles for the progress bar by color
 style.configure("1.Horizontal.TProgressbar", troughcolor ='gray', background='red') 
 style.configure("2.Horizontal.TProgressbar", troughcolor ='gray', background='yellow')
 style.configure("3.Horizontal.TProgressbar", troughcolor ='gray', background='green')
@@ -283,6 +289,13 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
     layout.extend(city_buttons)
 
 def get_boston(layout: list, ser: serial.Serial, lanes: list):
+    """This function displays the screen showing road info in Boston
+
+    Args:
+        layout (list): layout of the window
+        ser (serial.Serial): serial object
+        lanes (list): list of lanes
+    """
     reset_window()
     clear(layout)
 
@@ -308,6 +321,13 @@ def get_boston(layout: list, ser: serial.Serial, lanes: list):
     window.grid_rowconfigure((0, 7), weight=3)
 
 def get_london(layout: list, ser: serial.Serial, lanes: list):
+    """This function displays the screen showing road info in London
+
+    Args:
+        layout (list): layout of the window
+        ser (serial.Serial): serial object
+        lanes (list): list of lanes
+    """
     reset_window()
     clear(layout)
 
@@ -333,6 +353,13 @@ def get_london(layout: list, ser: serial.Serial, lanes: list):
     window.grid_rowconfigure((0, 11), weight=3)
 
 def get_tokyo(layout: list, ser: serial.Serial, lanes: list):
+    """This function displays the screen showing road info in Tokyo
+
+    Args:
+        layout (list): layout of the window
+        ser (serial.Serial): serial object
+        lanes (list): list of lanes
+    """
     reset_window()
     clear(layout)
 
@@ -358,6 +385,13 @@ def get_tokyo(layout: list, ser: serial.Serial, lanes: list):
     window.grid_rowconfigure((0, 10), weight=3)
 
 def get_lagos(layout: list, ser: serial.Serial, lanes: list):
+    """This function displays the screen showing road info in Lagos
+
+    Args:
+        layout (list): layout of the window
+        ser (serial.Serial): serial object
+        lanes (list): list of lanes
+    """
     reset_window()
     clear(layout)
 
@@ -383,6 +417,13 @@ def get_lagos(layout: list, ser: serial.Serial, lanes: list):
     window.grid_rowconfigure((0, 8, 9, 10), weight=3)
 
 def get_lima(layout: list, ser: serial.Serial, lanes: list):
+    """This function displays the screen showing road info in Lima
+
+    Args:
+        layout (list): layout of the window
+        ser (serial.Serial): serial object
+        lanes (list): list of lanes
+    """
     reset_window()
     clear(layout)
 
@@ -408,6 +449,14 @@ def get_lima(layout: list, ser: serial.Serial, lanes: list):
     window.grid_rowconfigure((0, 11), weight=3)
 
 def road_cost(lanes: str) -> int:
+    """This function calculates the total cost per 100 people of the road
+
+    Args:
+        lanes (str): road lanes
+
+    Returns:
+        int: total road cost
+    """
     result = 0
     for lane in lanes:
         result += average_cost(lane)
@@ -415,6 +464,14 @@ def road_cost(lanes: str) -> int:
     return int(result / len(lanes))
     
 def road_capacity(lanes: str):
+    """This function calculates the total capacity of the road
+
+    Args:
+        lanes (str): road lanes
+
+    Returns:
+        int: total road capacity
+    """
     result = 0
     for lane in lanes:
         result += RoadCapacity.capacity[lane]
@@ -422,6 +479,14 @@ def road_capacity(lanes: str):
     return int(result)
 
 def road_emissions(lanes: str) -> int:
+    """This function calculates the total emissions per 100 people of the road
+
+    Args:
+        lanes (str): road lanes
+
+    Returns:
+        int: total road emissions
+    """
     result = 0
     for lane in lanes:
         result += average_emissions(lane)
@@ -459,6 +524,16 @@ def average_emissions(lane: str) -> int:
     return int(total_emissions / len(emissions))
 
 def city_emissions(lanes: list, city: int) -> int:
+    """This function calculates the total emissions per 100 people of the road
+    for a specific city
+
+    Args:
+        lanes (str): road lanes
+        city (int): city of choice
+
+    Returns:
+        int: total road emissions in a speficic city
+    """
     result = 0
     for lane in lanes:
         result += emissions[city][lane]
@@ -466,42 +541,94 @@ def city_emissions(lanes: list, city: int) -> int:
     return int(result / len(lanes))
 
 def city_cost(lanes: list, city: int) -> int:
+    """This function calculates the total cost per 100 people of the road
+    for a specific city
+
+    Args:
+        lanes (str): road lanes
+        city (int): city of choice
+
+    Returns:
+        int: total road cost in a speficic city
+    """
     result = 0
     for lane in lanes:
         result += cost[city][lane]
 
     return int(result / len(lanes))
 
-def get_progress_score(score: int):
-    if score < 40:
+def get_progress_score(score: int) -> str:
+    """This function returns the style for the progress bar to represent
+    the proper color for each score range:
+    0 - 33: red
+    33 - 66: yellow
+    66 - 100: green
+
+    Args:
+        score (int): score
+
+    Returns:
+        _str_: style of progress bar
+    """
+    if score < 33:
         return "1.Horizontal.TProgressbar"
 
-    elif score >= 40 and score <=60:
+    elif score >= 33 and score <=66:
         return "2.Horizontal.TProgressbar"
 
     else:
         return "3.Horizontal.TProgressbar"
 
 def get_capacity_score(lanes: list) -> int:
+    """This function calculates the capacity score of the road. From 0 to 100.
+
+    Args:
+        lanes (list): lanes
+
+    Returns:
+        int: capacity score
+    """
     capacity = road_capacity(lanes) / 6
 
     for i, cap in enumerate(capacity_range):
         if capacity <= cap:
             return i
+    
+    return 100
 
 def get_cost_score(lanes: list):
+    """This function calculates the cost score of the road. From 0 to 100.
+
+    Args:
+        lanes (list): lanes
+
+    Returns:
+        int: cost score
+    """
     cost = road_cost(lanes)
 
     for i, cos in enumerate(cost_range):
         if cost < cos:
             return 100-i
         
+    return 0
+        
 def get_emissions_score(lanes: list):
+    """This function calculates the emissions score of the road. From 0 to 100.
+
+    Args:
+        lanes (list): lanes
+
+    Returns:
+        int: emissions score
+    """
     emissions = road_emissions(lanes) 
 
     for i, em in enumerate(emissions_range):
         if emissions < em:
             return 100 - i
+
+    return 0
 
 def pack(layout: list):
     """This function packs all the labels in the layout.
