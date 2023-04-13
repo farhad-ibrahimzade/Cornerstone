@@ -258,12 +258,12 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
 
     window.grid_rowconfigure((13), weight=1)
 
-    city_buttons = [tk.Button(text ="Restart game", font=("Arial", 15), command  = lambda: start_game(layout, ser, lanes)),
-                    tk.Button(text="Boston", font=("Arial", 15), command = lambda: get_boston(layout, ser, lanes)),
-                    tk.Button(text="London", font=("Arial", 15), command = lambda: get_london(layout, ser, lanes)),
-                    tk.Button(text="Tokyo", font=("Arial", 15),  command = lambda: get_tokyo(layout, ser, lanes)), 
-                    tk.Button(text="Lagos", font=("Arial", 15), command = lambda: get_lagos(layout, ser, lanes)),
-                    tk.Button(text="Lima", font=("Arial", 15), command = lambda: get_lima(layout, ser, lanes))]
+    city_buttons = [tk.Button(text ="Restart game", font=("Arial", 20), command  = lambda: start_game(layout, ser, lanes)),
+                    tk.Button(text="Boston", font=("Arial", 20), command = lambda: get_boston(layout, ser, lanes)),
+                    tk.Button(text="London", font=("Arial", 20), command = lambda: get_london(layout, ser, lanes)),
+                    tk.Button(text="Tokyo", font=("Arial", 20),  command = lambda: get_tokyo(layout, ser, lanes)), 
+                    tk.Button(text="Lagos", font=("Arial", 20), command = lambda: get_lagos(layout, ser, lanes)),
+                    tk.Button(text="Lima", font=("Arial", 20), command = lambda: get_lima(layout, ser, lanes))]
 
     for i,btn in enumerate(city_buttons):
         btn.config(bg= "#747473", fg= "white")
