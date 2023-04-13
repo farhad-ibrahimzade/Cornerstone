@@ -15,11 +15,11 @@ const int greenLED = 5;
 
 const int contrast = 110;
 
-const int gameDelay = 1500;
+const int gameDelay = 500;
 
 String pedestrian[4] = {"04 2B 60 A2 5C 64 81", "04 20 53 C2 5C 64 80", "04 4C 51 C2 5C 64 81", "04 F1 18 42 5D 64 80"};
 String tram[4] = {"04 39 3C 42 5D 64 81", "04 52 40 42 5D 64 80", "04 EF 14 42 5D 64 80", "04 0C EF 7A 5D 64 81"};
-String bus[4] = {"04 FA 41 42 5D 64 80", "04 28 60 A2 5C 64 81", "90 5F B1 26", "04 0B EF 7A 5D 64 81"};
+String bus[4] = {"04 FA 41 42 5D 64 80", "04 28 60 A2 5C 64 81", "90 5F B1 26", "04 0B EF 7A 5D 64 81"}; //fixed chip: 04 B3 F2 42 5D 64 80
 String bike[4] = {"04 4B EA 4A 5D 64 81", "04 57 40 42 5D 64 80", "04 53 55 C2 5C 64 81", "04 25 53 C2 5C 64 80"};
 String car[4] = {"04 F2 EA BA 5C 64 80", "04 A5 EB BA 5C 64 80", "04 B1 2E 22 A8 64 80", "04 BA EC 7A 5D 64 80"};
 
