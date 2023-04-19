@@ -2,6 +2,7 @@
     The program will take input from an Arduino using serial.
     Please check and define the serial port prior to running the code."""
 
+# Import necessary modules
 import serial
 import numpy as np
 import tkinter as tk
@@ -27,6 +28,7 @@ capacity_range = np.linspace(1000, 15000, 100)
 cost_range = np.linspace(0, 6000000, 100)
 emissions_range = np.linspace(0, 18149, 100)
 
+# Create a Serial object and a COM port variable
 # Make sure the 'COM#' is set according the Windows Device Manager
 serial_port = "COM3"
 ser = serial.Serial()
@@ -74,7 +76,8 @@ lanes = []
 layout = []
 
 def reset_window():
-    """This function resets the window grid
+    """This function resets the window grid by resetting
+    rows and columns.
     """
     window.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20), weight=0)
     window.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20), weight=0)
@@ -91,34 +94,44 @@ def start_game(layout: list, ser: serial.Serial, lanes: list):
     """
     reset_window()
     
+    # Clear the lanes and restart the Serial protocol to reset the Arduino board
     lanes = []
-    ser.close() #TODO: remove once done testing
+    ser.close()
     ser = serial.Serial(serial_port, 9800, timeout=1)
 
     clear(layout)
 
+    # Create the background
     background = tk.Label(image=data[5])
     background.place(x=0, y=0, relwidth=1, relheight=1)
 
+    # Welcome and instructions text
     text = [tk.Label(text = "Welcome to the fix the Road Game", font=("Arial", 22)),
                 tk.Label(text = "Scan and place your lanes on the road", font=("Arial", 22)),
                 tk.Label(text = "Please click the button below when done scanning", font=("Arial", 22))]
 
+    # "Done scanning" button
     button = tk.Button(text="Done Scanning", command = lambda: display_road(layout, ser, lanes), font=("Arial", 22))
 
+    # Configure the color of all text
     text[0].config(bg= "white", fg= "black")
     text[1].config(bg= "white", fg= "black")
     text[2].config(bg= "white", fg= "black")
 
+    # Place text on the grid of the window
     text[0].grid(row=1, column=1)
     text[1].grid(row=2, column=1)
     text[2].grid(row=3, column=1)
+
+    # Place button on the grid of the window
     button.grid(row=7, column=1)
 
+    # Add all layout elements to the layout list to keep track of them
     layout.append(background)
     layout.extend(text)
     layout.append(button)
 
+    # Congfigure rows and columns to adjust the grid
     window.grid_columnconfigure((0, 2), weight=1)
     window.grid_rowconfigure((4, 5, 6), weight=1)
     window.grid_rowconfigure((0, 8), weight=2) 
@@ -160,17 +173,28 @@ def get_lanes(ser: serial.Serial, lanes: list) -> list:
         list: list of lanes
     """
 
-    line = ser.readline()   # read a byte
+    # Read the next line
+    line = ser.readline()
+
     if line:
-        string = line.decode()  # convert the byte string to a unicode string
+        # If the line is not empty
+
+        # Decode the line and convert it to a string
+        string = line.decode()
+        # Trim the extra characters (escape sequences)
         string = string[:-2]
+        # Split the string into lane type and number
         data = string.split(",")
+        # Add the data to the list of lanes
         lanes.append(data[0])
-        output = "Lane" + str(data[1]) + ": " + data[0]
+        # Output the scanned lane into the console
         print(string)
+
         if int(data[1]) != 5:
+            # RECURSION: call the function until all lanes have been scanned
             get_lanes(ser, lanes)
 
+        # Return the list of lanes
         return lanes
 
 def display_road(layout: list, ser: serial.Serial, lanes: list):
@@ -184,87 +208,102 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
         lanes (list): list of lanes
     """
 
+    # Reset the window and destroy all labels in the layout
     reset_window()
     clear(layout)
 
+    # Create the background
     road_background = tk.Label(image=road)
     road_background.place(x=0, y=0, relwidth=1, relheight=1)
 
-    #lanes = ["Pedestrian", "Bike", "Car", "Tram", "Bike", "Pedestrian"]
+    # Get the lanes if there are none in memory
     if len(lanes) == 0:
-        lanes = get_lanes(ser, lanes) #TODO: fix if lanes not empty
+        lanes = get_lanes(ser, lanes)
 
+    # Create and configure the top text
     top_text = tk.Label(text = "Thank you for scanning, here is your road: ", font=("Arial", 25))
 
     top_text.config(bg= "#747473", fg= "white")
 
     top_text.grid(row = 1, column = 2, columnspan = 4)
 
-    window.grid_rowconfigure((2), weight=1)
+    # Configure rows for proper GUI spacing
+    window.grid_rowconfigure((2, 4), weight=1)
 
-    # text = [tk.Label(text=lanes[0], font = ("Arial", 15)), tk.Label(text=lanes[1], font = ("Arial", 15)), tk.Label(text=lanes[2], font = ("Arial", 15)), 
-    #         tk.Label(text=lanes[3], font = ("Arial", 15)), tk.Label(text=lanes[4], font = ("Arial", 15)), tk.Label(text=lanes[5], font = ("Arial", 15))]
-
-    # for i,txt in enumerate(text):
-    #     txt.config(bg= "#747473", fg= "white")
-    #     txt.grid(row=3, column=i+1)
-
-    window.grid_rowconfigure((4), weight=1)
-
+    # Create labels for the images of the lanes
     images = [tk.Label(image=get_image(lanes[0])), tk.Label(image=get_image(lanes[1])), tk.Label(image=get_image(lanes[2])),
                 tk.Label(image=get_image(lanes[3])), tk.Label(image=get_image(lanes[4])), tk.Label(image=get_image(lanes[5]))]
-    for i,img in enumerate(images):
+    
+    # Configure images for lanes and place them on the grid
+    for i, img in enumerate(images):
         img.config(bg= "#747473", fg= "white")
         img.grid(row=5, column=i+1)
 
+    # Configure rows for proper GUI spacing
     window.grid_rowconfigure((6), weight=1)
 
+    # Create labels for the road data
     display_data = [tk.Label(text = f"Average emissions: {road_emissions(lanes):,} {emissions_unit}", font=("Arial", 15)),
                     tk.Label(text = f"Average capacity: {road_capacity(lanes):,} {capacity_unit}", font=("Arial", 15)),
                     tk.Label(text = f"Average cost: {road_cost(lanes):,} {cost_unit}", font=("Arial", 15))]
 
+    # Configure the color of the text
     for dat in display_data:
         dat.config(bg= "#747473", fg= "white")
 
+    # Place the text on the grid
     display_data[0].grid(row = 7, column= 1, columnspan= 2)
     display_data[1].grid(row = 7, column= 3, columnspan= 2)
     display_data[2].grid(row = 7, column= 5, columnspan= 2)
 
+    # Configure rows for proper GUI spacing
     window.grid_rowconfigure((8), weight=1)
 
+    # Create labels for the scores
     scores = [tk.Label(text=f"You scored {get_emissions_score(lanes)}% in emissions", font = ("Arial", 15)), 
               tk.Label(text=f"You scored {get_capacity_score(lanes)}% in capacity", font = ("Arial", 15)), 
               tk.Label(text=f"You scored {get_cost_score(lanes)}% in cost", font = ("Arial", 15))]
 
-    for i,score in enumerate(scores):
+    # Configure the color of the text
+    for i, score in enumerate(scores):
         score.config(bg= "#747473", fg= "white")
 
+    # Place the text on the grid
     scores[0].grid(row = 9, column= 1, columnspan= 2)
     scores[1].grid(row = 9, column= 3, columnspan= 2)
     scores[2].grid(row = 9, column= 5, columnspan= 2)
     
+    # Configure the score progress bars
     score_bars = [ttk.Progressbar(window, style= get_progress_score(get_emissions_score(lanes)), orient = "horizontal", length = 200, mode = "determinate"), 
                 ttk.Progressbar(window, style= get_progress_score(get_capacity_score(lanes)), orient = "horizontal", length = 200, mode = "determinate"),
                 ttk.Progressbar(window, style= get_progress_score(get_cost_score(lanes)), orient = "horizontal", length = 200, mode = "determinate")]
 
+    # Set the value of the progress bar based on the user score
     score_bars[0]["value"] = get_emissions_score(lanes)
     score_bars[1]["value"] = get_capacity_score(lanes)
     score_bars[2]["value"] = get_cost_score(lanes)
 
+    # Place the progress bars on the grid
     score_bars[0].grid(row = 10, column= 1, columnspan= 2)
     score_bars[1].grid(row = 10, column= 3, columnspan= 2)
     score_bars[2].grid(row = 10, column= 5, columnspan= 2)
 
+    # Configure rows for proper GUI spacing
     window.grid_rowconfigure((11), weight=1)
 
+    # Configure text for the global performance
     globe_text = tk.Label(text = "See how your road performs across the globe:", font=("Arial", 17))
 
+    # Configure the color of the text
     globe_text.config(bg= "#747473", fg= "white")
 
+    # Place the text on the grid
     globe_text.grid(row = 12, column=3, columnspan=2)
 
+    # Configure rows for proper GUI spacing
     window.grid_rowconfigure((13), weight=1)
 
+    # Configure the buttons for the cities and the restart game
     city_buttons = [tk.Button(text ="Restart game", font=("Arial", 20), command  = lambda: start_game(layout, ser, lanes)),
                     tk.Button(text="Boston", font=("Arial", 20), command = lambda: get_boston(layout, ser, lanes)),
                     tk.Button(text="London", font=("Arial", 20), command = lambda: get_london(layout, ser, lanes)),
@@ -272,13 +311,16 @@ def display_road(layout: list, ser: serial.Serial, lanes: list):
                     tk.Button(text="Lagos", font=("Arial", 20), command = lambda: get_lagos(layout, ser, lanes)),
                     tk.Button(text="Lima", font=("Arial", 20), command = lambda: get_lima(layout, ser, lanes))]
 
-    for i,btn in enumerate(city_buttons):
+    # Set the color and place the buttons on the grid
+    for i, btn in enumerate(city_buttons):
         btn.config(bg= "#747473", fg= "white")
         btn.grid(row=14, column=i+1)
 
+    # Configure rows and columns for proper GUI spacing
     window.grid_columnconfigure((0, 7), weight=3)
     window.grid_rowconfigure((0, 15), weight=3)
 
+    # Add all layout elements to the layout list to keep track of them
     layout.append(road_background)
     layout.append(top_text)
     layout.extend(images)
@@ -296,26 +338,38 @@ def get_boston(layout: list, ser: serial.Serial, lanes: list):
         ser (serial.Serial): serial object
         lanes (list): list of lanes
     """
+    # Reset the window and destroy all labels
     reset_window()
     clear(layout)
 
+    # Create and configure the background
     background = tk.Label(image=data[4])
     background.place(x=0, y=0, relwidth=1, relheight=1)
+    
+    # Create and configure the text
     text = [tk.Label(text = f"The emissions of your road in Boston would be {city_emissions(lanes, Cities.boston):,} {emissions_unit}", font=("Arial", 18)),
             tk.Label(text = f"The cost of your road in Boston would be {city_cost(lanes, Cities.boston):,} {cost_unit}", font=("Arial", 18))]
+    
+    # Set color of text
     text[0].config(bg= "white", fg= "black")
     text[1].config(bg= "white", fg= "black")
+
+    # Place text on grid
     text[0].grid(row = 5, column = 1)
     text[1].grid(row = 6, column = 1)
 
+    # Create return button
     button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
 
+    # Place return botton
     button.grid(row = 1, column = 1)
 
+    # Add all layout items to the list
     layout.append(background)
     layout.extend(text)
     layout.append(button)
     
+    # Configure all rows and columns
     window.grid_columnconfigure((0, 2), weight=1)
     window.grid_rowconfigure((2, 3, 4), weight=2)
     window.grid_rowconfigure((0, 7), weight=3)
@@ -328,26 +382,38 @@ def get_london(layout: list, ser: serial.Serial, lanes: list):
         ser (serial.Serial): serial object
         lanes (list): list of lanes
     """
+    # Reset the window and destroy all labels
     reset_window()
     clear(layout)
 
+    # Create and configure the background
     background = tk.Label(image=data[3])
     background.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Create and configure the text
     text = [tk.Label(text = f"The emissions of your road in London would be {city_emissions(lanes, Cities.london):,} {emissions_unit}", font=("Arial", 25)),
             tk.Label(text = f"The cost of your road in London would be {city_cost(lanes, Cities.london):,} {cost_unit}", font=("Arial", 25))]
+    
+    # Set color of text
     text[0].config(bg= "white", fg= "black")
     text[1].config(bg= "white", fg= "black")
+    
+    # Place text on grid
     text[0].grid(row = 1, column = 1)
     text[1].grid(row = 2, column = 1)
 
+    # Create return button
     button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
 
+    # Place return botton
     button.grid(row = 10, column = 1)
 
+    # Add all layout items to the list
     layout.append(background)
     layout.extend(text)
     layout.append(button)
     
+    # Configure all rows and columns
     window.grid_columnconfigure((0, 2), weight=1)
     window.grid_rowconfigure((3, 4, 5, 6, 7, 9), weight=1)
     window.grid_rowconfigure((0, 11), weight=3)
@@ -360,26 +426,38 @@ def get_tokyo(layout: list, ser: serial.Serial, lanes: list):
         ser (serial.Serial): serial object
         lanes (list): list of lanes
     """
+    # Reset the window and destroy all labels
     reset_window()
     clear(layout)
 
+    # Create and configure the background
     background = tk.Label(image=data[13])
     background.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Create and configure the text
     text = [tk.Label(text = f"The emissions of your road in Tokyo would be {city_emissions(lanes, Cities.tokyo):,} {emissions_unit}", font=("Arial", 25)),
             tk.Label(text = f"The cost of your road in Tokyo would be {city_cost(lanes, Cities.tokyo):,} {cost_unit}", font=("Arial", 25))]
+    
+    # Set color of text
     text[0].config(bg= "white", fg= "black")
     text[1].config(bg= "white", fg= "black")
+    
+    # Place text on grid
     text[0].grid(row = 1, column = 1)
     text[1].grid(row = 2, column = 1)
 
+    # Create return button
     button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
 
+    # Place return botton
     button.grid(row = 9, column = 1)
 
+    # Add all layout items to the list
     layout.append(background)
     layout.extend(text)
     layout.append(button)
     
+    # Configure all rows and columns
     window.grid_columnconfigure((0, 2), weight=1)
     window.grid_rowconfigure((3, 4, 5, 6, 7, 8), weight=2)
     window.grid_rowconfigure((0, 10), weight=3)
@@ -392,26 +470,38 @@ def get_lagos(layout: list, ser: serial.Serial, lanes: list):
         ser (serial.Serial): serial object
         lanes (list): list of lanes
     """
+    # Reset the window and destroy all labels
     reset_window()
     clear(layout)
 
+    # Create and configure the background
     background = tk.Label(image=data[11])
     background.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Create and configure the text
     text = [tk.Label(text = f"The emissions of your road in Lagos would be {city_emissions(lanes, Cities.lagos):,} {emissions_unit}", font=("Arial", 21)),
             tk.Label(text = f"The cost of your road in Lagos would be {city_cost(lanes, Cities.lagos):,} {cost_unit}", font=("Arial", 21))]
+    
+    # Set color of text
     text[0].config(bg= "white", fg= "black")
     text[1].config(bg= "white", fg= "black")
+
+    # Place text on grid
     text[0].grid(row = 6, column = 1)
     text[1].grid(row = 7, column = 1)
 
+    # Create return button
     button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
 
+    # Place return botton
     button.grid(row = 1, column = 1)
 
+    # Add all layout items to the list
     layout.append(background)
     layout.extend(text)
     layout.append(button)
     
+    # Configure all rows and columns
     window.grid_columnconfigure((0, 2), weight=1)
     window.grid_rowconfigure((3, 4, 5), weight=1)
     window.grid_rowconfigure((0, 8, 9, 10), weight=3)
@@ -424,26 +514,38 @@ def get_lima(layout: list, ser: serial.Serial, lanes: list):
         ser (serial.Serial): serial object
         lanes (list): list of lanes
     """
+    # Reset the window and destroy all labels
     reset_window()
     clear(layout)
 
+    # Create and configure the background
     background = tk.Label(image=data[8])
     background.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Create and configure the text
     text = [tk.Label(text = f"The emissions of your road in Lima would be {city_emissions(lanes, Cities.lima):,} {emissions_unit}", font=("Arial", 22)),
             tk.Label(text = f"The cost of your road in Lima would be {city_cost(lanes, Cities.lima):,} {cost_unit}", font=("Arial", 22))]
+    
+    # Set color of text
     text[0].config(bg= "white", fg= "black")
     text[1].config(bg= "white", fg= "black")
+
+    # Place text on grid
     text[0].grid(row = 9, column = 1)
     text[1].grid(row = 10, column = 1)
 
+    # Create return button
     button = tk.Button(text = "Return", command= lambda: display_road(layout, ser, lanes), font=("Arial", 25))
 
+    # Place return button
     button.grid(row = 1, column = 1)
 
+    # Add all layout items to the list
     layout.append(background)
     layout.extend(text)
     layout.append(button)
     
+    # Configure all rows and columns 
     window.grid_columnconfigure((0, 2), weight=1)
     window.grid_rowconfigure((3, 4, 5, 6), weight=2)
     window.grid_rowconfigure((0, 11), weight=3)
